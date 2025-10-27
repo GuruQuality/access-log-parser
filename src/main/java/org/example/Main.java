@@ -1,12 +1,11 @@
 package org.example;
-
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+import java.util.Scanner;
 public class Main {
     public static void main(String[] args) {
-        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-        // to see how IntelliJ IDEA suggests fixing it.
-        System.out.println("Случайное число от 0 до 1: " + Math.random());
-
+        System.out.println("“Введите текст и нажмите <Enter>: ”");
+        //читаем из консоли переданную строку
+        String text = new Scanner(System.in).nextLine();
+        //выводим длину переданного текста
+        System.out.print("Длина текста: " + text.length());
     }
 }
