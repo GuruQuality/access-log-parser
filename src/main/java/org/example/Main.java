@@ -36,62 +36,36 @@ public class Main {
                 BufferedReader reader =
                         new BufferedReader(fileReader);
                 String line;
-//                Integer maxLength = 0;
-//                Integer minLength = 1024;
+
                 Integer allLine = 0;
                 String yandexBot = "YandexBot";
                 int quantityYandexBot = 0;
                 String googleBot = "Googlebot";
                 int quantityGooglebot = 0;
+                Statistics statistics = new Statistics();
                 while ((line = reader.readLine()) != null) {
-                    int length = line.length();// Подсчет символов в строке
-
-                    // 1. Ищем содержимое в первых скобках
-                    int startIndex = line.lastIndexOf('(');
-                    int endIndex = line.lastIndexOf(')');
-                    if (startIndex == -1 || endIndex == -1) {
+                    LogEntry logEntry = null;
+                    try {
+                        logEntry = new LogEntry(line);
+                    } catch (Exception e) {
+                        System.out.println("Strange line(skip): " + line);
                         continue;
                     }
-                    if (startIndex > endIndex) {
-                        System.out.println(line);
-                        break;
-                    }
-//                    //System.out.println(length);
-//                    maxLength = Math.max(maxLength, length);
-//                    minLength = Math.min(minLength, length);
+                    statistics.addEntry(logEntry);
+                    int length = line.length();// Подсчет символов в строке
 
-                    // 1.1 Извлекаем содержимое первых скобок
-                    String firstBrackets = line.substring(startIndex, endIndex);
 
-                    // 2. Разделение по точке с запятой
-                    String[] parts = firstBrackets.split(";");
-
-                    // 3. Очищаем все фрагменты от пробелов
-                    for (int i = 0; i < parts.length; i++) {
-                        parts[i] = parts[i].trim(); // Удаляем пробелы в начале и конце
-                    }
-
-                    //4. Берем второй фрагмент;
-                    if (parts.length >= 2) {
-                        String fragment = parts[1];
-
-                        //5. Отделим в этом фрагменте часть до слэша
-                        int slashIndex = fragment.indexOf('/');
-                        String nameBot = fragment;
-                        if (slashIndex != -1) {
-                            nameBot = fragment.substring(0, slashIndex);//фрагмент до слеша
-                        }
-
-                        //Проверка фрагмента
-                        if (nameBot.equals(yandexBot)) {
+                    //Проверка фрагмента
+                    if (logEntry.userAgent != null) {
+                        if (logEntry.userAgent.nameBot != null && logEntry.userAgent.nameBot.equals(yandexBot)) {
                             quantityYandexBot++;
                         }
 
-                        if (nameBot.equals(googleBot)) {
+                        if (logEntry.userAgent.nameBot != null && logEntry.userAgent.nameBot.equals(googleBot)) {
                             quantityGooglebot++;
                         }
-                        //System.out.println(nameBot);
                     }
+                    //System.out.println(nameBot);
 
                     allLine++;
                     if (length > 1024) {
@@ -107,6 +81,11 @@ public class Main {
                 System.out.println();
                 System.out.println("Доля запросов от YandexBot: " + (float) quantityYandexBot / allLine * 100);
                 System.out.println("Доля запросов от GoogleBot: " + (float) quantityGooglebot / allLine * 100);
+                System.out.println();
+                System.out.println("minTime: " + statistics.minTime);
+                System.out.println("maxTime: " + statistics.maxTime);
+                System.out.println("totalTraffic: " + statistics.totalTraffic);
+                System.out.println("TrafficRate: " + statistics.getTrafficRate());
 
                 break;
             } catch (IOException e) {// Ловим исключения ввода и вывода
