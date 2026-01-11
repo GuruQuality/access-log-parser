@@ -67,4 +67,11 @@ public class UserAgent {
         }
 
     }
+
+    UserAgent() {
+        op = null;
+        browser = null;
+        nameBot = null;
+    }
+
 }

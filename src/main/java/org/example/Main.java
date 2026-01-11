@@ -84,8 +84,13 @@ public class Main {
                 System.out.println();
                 System.out.println("minTime: " + statistics.minTime);
                 System.out.println("maxTime: " + statistics.maxTime);
+                System.out.println();
                 System.out.println("totalTraffic: " + statistics.totalTraffic);
-                System.out.println("TrafficRate: " + statistics.getTrafficRate());
+                System.out.println("trafficRate: " + statistics.getTrafficRate());
+                System.out.println();
+                System.out.println("Unique url (getUniqueUrl): " + statistics.getUniqueUrl());
+                //System.out.println("Частота встречаемости каждой операционной системы(hashMap): " + statistics.hashMap);
+                System.out.println("Доля каждой операционной системы (share of operating systems): " + statistics.getShareOfOperatingSystems());
 
                 break;
             } catch (IOException e) {// Ловим исключения ввода и вывода

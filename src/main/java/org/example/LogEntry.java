@@ -93,6 +93,8 @@ public class LogEntry {
         String userAgentText = line.substring(endIndexRefer + 3, line.length() - 1);
         if (!userAgentText.equals("-")) {
             userAgent = new UserAgent(userAgentText);
+        }else {
+            userAgent = new UserAgent();
         }
     }
 }
