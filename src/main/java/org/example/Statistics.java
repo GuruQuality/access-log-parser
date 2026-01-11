@@ -10,10 +10,13 @@ public class Statistics {
     LocalDateTime maxTime;
     Long totalTraffic = 0L;
     //адреса страниц сайта с кодом ответа 200
-    HashSet<String> hashSet = new HashSet<>();
+    HashSet<String> hashSetExistPages = new HashSet<>();
     //статистика операционных систем пользователей сайта
-    HashMap<String, Integer> hashMap = new HashMap<>();
-
+    HashMap<String, Integer> hashMapOsStatistics = new HashMap<>();
+    //список всех несуществующих страниц сайта
+    HashSet<String> hashSetNotExistPages = new HashSet<>();
+    // Статистика частоты браузеров
+    HashMap<String, Integer> hashMapBrowserStatistics = new HashMap<>();
     Statistics() {
 
     }
@@ -26,29 +29,59 @@ public class Statistics {
         if (maxTime == null || logEntry.dataTime.compareTo(maxTime) > 0) {
             maxTime = logEntry.dataTime;
         }
+        // Создание hashSetExistPages
         if (logEntry.httpCode == 200) {
-            hashSet.add(logEntry.path);
+            hashSetExistPages.add(logEntry.path);
         }
         //Подсчет количества op
         if (logEntry.userAgent.op != null) {//проеврка наличия инфы об оп
-            if (hashMap.containsKey(logEntry.userAgent.op)) {//проеврка в hashMap наличия ключа с нашим оп
-                int countOp = hashMap.get(logEntry.userAgent.op);//из hashMap получили наше значение по ключу оп
-                hashMap.put(logEntry.userAgent.op, countOp + 1);//увеличили значение на 1
+            if (hashMapOsStatistics.containsKey(logEntry.userAgent.op)) {//проеврка в hashMap наличия ключа с нашим оп
+                int countOp = hashMapOsStatistics.get(logEntry.userAgent.op);//из hashMap получили наше значение по ключу оп
+                hashMapOsStatistics.put(logEntry.userAgent.op, countOp + 1);//увеличили значение на 1
             } else {
-                hashMap.put(logEntry.userAgent.op, 1);//создали запись по ключу оп со значением - 1
+                hashMapOsStatistics.put(logEntry.userAgent.op, 1);//создали запись по ключу оп со значением - 1
             }
         }
+
+        // Создание hashSetNotExistPages
+        if (logEntry.httpCode == 404) {
+            hashSetNotExistPages.add(logEntry.path);
+        }
+
+        //Подсчет количества браузеров
+        if (logEntry.userAgent.browser != null) {//проеврка наличия инфы об оп
+            if (hashMapBrowserStatistics.containsKey(logEntry.userAgent.browser)) {//проеврка в hashMap наличия ключа с нашим оп
+                int countBrowser = hashMapBrowserStatistics.get(logEntry.userAgent.browser);//из hashMap получили наше значение по ключу оп
+                hashMapBrowserStatistics.put(logEntry.userAgent.browser, countBrowser + 1);//увеличили значение на 1
+            } else {
+                hashMapBrowserStatistics.put(logEntry.userAgent.browser, 1);//создали запись по ключу оп со значением - 1
+            }
+        }
+    }
+
+    public HashMap<String, Double> getShareOfBrowsers() {
+        HashMap<String, Double> result = new HashMap<>();
+        Long allBrowsers = 0l;
+        for (Integer value : hashMapBrowserStatistics.values()) {
+            allBrowsers += value;
+        }
+        //System.out.println("allBrowsers " + allBrowsers);
+        for (String key : hashMapBrowserStatistics.keySet()) {
+            Integer value = hashMapBrowserStatistics.get(key);
+            result.put(key,(double) value / allBrowsers );
+        }
+        return result;
     }
 
     public HashMap<String, Double> getShareOfOperatingSystems() {
         HashMap<String, Double> result = new HashMap<>();
         Long allOs = 0l;
-        for (Integer value : hashMap.values()) {
+        for (Integer value : hashMapOsStatistics.values()) {
             allOs += value;
         }
         //System.out.println("allOs " + allOs);
-        for (String key : hashMap.keySet()) {
-            Integer value = hashMap.get(key);
+        for (String key : hashMapOsStatistics.keySet()) {
+            Integer value = hashMapOsStatistics.get(key);
             result.put(key,(double) value / allOs );
             //System.out.println(key + " = " + value);
             //System.out.println(key + " = " + (double) value / allOs * 100);
@@ -64,6 +97,10 @@ public class Statistics {
     }
 
     public HashSet<String> getUniqueUrl() {
-        return hashSet;
+        return hashSetExistPages;
+    }
+
+    public HashSet<String> getNotExistPages(){
+        return hashSetNotExistPages;
     }
 }

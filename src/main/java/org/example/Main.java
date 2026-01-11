@@ -88,9 +88,14 @@ public class Main {
                 System.out.println("totalTraffic: " + statistics.totalTraffic);
                 System.out.println("trafficRate: " + statistics.getTrafficRate());
                 System.out.println();
-                System.out.println("Unique url (getUniqueUrl): " + statistics.getUniqueUrl());
-                //System.out.println("Частота встречаемости каждой операционной системы(hashMap): " + statistics.hashMap);
+                //System.out.println("Unique url (getUniqueUrl): " + statistics.getUniqueUrl());
+                //System.out.println("Частота встречаемости каждой операционной системы: " + statistics.hashMapOsStatistics);
                 System.out.println("Доля каждой операционной системы (share of operating systems): " + statistics.getShareOfOperatingSystems());
+                System.out.println();
+                System.out.println("Возрат не существуюших страниц: " + statistics.getNotExistPages());
+                System.out.println("Частота встречаемости каждого браузера: " + statistics.hashMapBrowserStatistics);
+                System.out.println("Доля каждого браузера (share of browsers): " + statistics.getShareOfBrowsers());
+
 
                 break;
             } catch (IOException e) {// Ловим исключения ввода и вывода
