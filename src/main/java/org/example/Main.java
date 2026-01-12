@@ -11,98 +11,95 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) {
         int count = 1;
-        while (true) {
-            System.out.println("Введите путь к файлу");
-            //String path = new Scanner(System.in).nextLine();
-            String path = "/Users/kate/IdeaProjects_JAVA/access-log-parser/src/test/access.log";
-            File file = new File(path);
-            boolean objectExists = file.exists();//Проверяем сущетсвет ли путь
-            if (!objectExists) {
-                System.out.println("Путь указан не верно");
-                continue;
-            }
-            boolean isDirectory = file.isDirectory();//Проверяем что объект является папкой
-            if (isDirectory) {
-                System.out.println("Указанный путь является путём к папке, а не к файлу");
-                continue;
-            }
-            System.out.println("Путь указан верно");
-            System.out.println("Это файл номер " + count);
+        System.out.println("Введите путь к файлу");
+        //String path = new Scanner(System.in).nextLine();
+        String path = "/Users/kate/IdeaProjects_JAVA/access-log-parser/src/test/access.log";
+        File file = new File(path);
+        boolean objectExists = file.exists();//Проверяем сущетсвет ли путь
+        if (!objectExists) {
+            System.out.println("Путь указан не верно");
+            return;
+        }
+        boolean isDirectory = file.isDirectory();//Проверяем что объект является папкой
+        if (isDirectory) {
+            System.out.println("Указанный путь является путём к папке, а не к файлу");
+            return;
+        }
+        System.out.println("Путь указан верно");
+        System.out.println("Это файл номер " + count);
 
-            count += 1;
+        count += 1;
 
-            try {
-                FileReader fileReader = new FileReader(path);
-                BufferedReader reader =
-                        new BufferedReader(fileReader);
-                String line;
+        try {
+            FileReader fileReader = new FileReader(path);
+            BufferedReader reader =
+                    new BufferedReader(fileReader);
+            String line;
 
-                Integer allLine = 0;
-                String yandexBot = "YandexBot";
-                int quantityYandexBot = 0;
-                String googleBot = "Googlebot";
-                int quantityGooglebot = 0;
-                Statistics statistics = new Statistics();
-                while ((line = reader.readLine()) != null) {
-                    LogEntry logEntry = null;
-                    try {
-                        logEntry = new LogEntry(line);
-                    } catch (Exception e) {
-                        System.out.println("Strange line(skip): " + line);
-                        continue;
+            Integer allLine = 0;
+            String yandexBot = "YandexBot";
+            int quantityYandexBot = 0;
+            String googleBot = "Googlebot";
+            int quantityGooglebot = 0;
+            Statistics statistics = new Statistics();
+            while ((line = reader.readLine()) != null) {
+                LogEntry logEntry = null;
+                try {
+                    logEntry = new LogEntry(line);
+                } catch (Exception e) {
+                    System.out.println("Strange line(skip): " + line);
+                    continue;
+                }
+                statistics.addEntry(logEntry);
+                int length = line.length();// Подсчет символов в строке
+
+
+                //Проверка фрагмента
+                if (logEntry.userAgent != null) {
+                    if (logEntry.userAgent.nameBot != null && logEntry.userAgent.nameBot.equals(yandexBot)) {
+                        quantityYandexBot++;
                     }
-                    statistics.addEntry(logEntry);
-                    int length = line.length();// Подсчет символов в строке
 
-
-                    //Проверка фрагмента
-                    if (logEntry.userAgent != null) {
-                        if (logEntry.userAgent.nameBot != null && logEntry.userAgent.nameBot.equals(yandexBot)) {
-                            quantityYandexBot++;
-                        }
-
-                        if (logEntry.userAgent.nameBot != null && logEntry.userAgent.nameBot.equals(googleBot)) {
-                            quantityGooglebot++;
-                        }
-                    }
-                    //System.out.println(nameBot);
-
-                    allLine++;
-                    if (length > 1024) {
-                        throw new LimitLineLengthException("В строке более 1024 символов");
+                    if (logEntry.userAgent.nameBot != null && logEntry.userAgent.nameBot.equals(googleBot)) {
+                        quantityGooglebot++;
                     }
                 }
+                //System.out.println(nameBot);
+
+                allLine++;
+                if (length > 1024) {
+                    throw new LimitLineLengthException("В строке более 1024 символов");
+                }
+            }
 //                System.out.println("Длина самой длинной строки в файле: " + maxLength);
 //                System.out.println("Длина самой короткой строки в файле: " + minLength);
-                System.out.println("Общее количество строк в файле: " + allLine);
-                System.out.println();
-                System.out.println("Количество запросов от YandexBot: " + quantityYandexBot);
-                System.out.println("Количество запросов от GoogleBot: " + quantityGooglebot);
-                System.out.println();
-                System.out.println("Доля запросов от YandexBot: " + (float) quantityYandexBot / allLine * 100);
-                System.out.println("Доля запросов от GoogleBot: " + (float) quantityGooglebot / allLine * 100);
-                System.out.println();
-                System.out.println("minTime: " + statistics.minTime);
-                System.out.println("maxTime: " + statistics.maxTime);
-                System.out.println();
-                System.out.println("totalTraffic: " + statistics.totalTraffic);
-                System.out.println("trafficRate: " + statistics.getTrafficRate());
-                System.out.println();
-                //System.out.println("Unique url (getUniqueUrl): " + statistics.getUniqueUrl());
-                //System.out.println("Частота встречаемости каждой операционной системы: " + statistics.hashMapOsStatistics);
-                System.out.println("Доля каждой операционной системы (share of operating systems): " + statistics.getShareOfOperatingSystems());
-                System.out.println();
-                System.out.println("Возрат не существуюших страниц: " + statistics.getNotExistPages());
-                System.out.println("Частота встречаемости каждого браузера: " + statistics.hashMapBrowserStatistics);
-                System.out.println("Доля каждого браузера (share of browsers): " + statistics.getShareOfBrowsers());
+            System.out.println("Общее количество строк в файле: " + allLine);
+            System.out.println();
+            System.out.println("Количество запросов от YandexBot: " + quantityYandexBot);
+            System.out.println("Количество запросов от GoogleBot: " + quantityGooglebot);
+            System.out.println();
+            System.out.println("Доля запросов от YandexBot: " + (float) quantityYandexBot / allLine * 100);
+            System.out.println("Доля запросов от GoogleBot: " + (float) quantityGooglebot / allLine * 100);
+            System.out.println();
+            System.out.println("minTime: " + statistics.minTime);
+            System.out.println("maxTime: " + statistics.maxTime);
+            System.out.println();
+            System.out.println("totalTraffic: " + statistics.totalTraffic);
+            System.out.println("trafficRate: " + statistics.getTrafficRate());
+            System.out.println();
+            //System.out.println("Unique url (getUniqueUrl): " + statistics.getUniqueUrl());
+            //System.out.println("Частота встречаемости каждой операционной системы: " + statistics.hashMapOsStatistics);
+            //System.out.println("Доля каждой операционной системы (share of operating systems): " + statistics.getShareOfOperatingSystems());
+            //System.out.println();
+            //System.out.println("Возрат не существуюших страниц: " + statistics.getNotExistPages());
+            //System.out.println("Частота встречаемости каждого браузера: " + statistics.hashMapBrowserStatistics);
+            //System.out.println("Доля каждого браузера (share of browsers): " + statistics.getShareOfBrowsers());
+            System.out.println("Подсчёта среднего количества посещений сайта за час (только пользователи): " + statistics.getAverageUserPerHour());
 
-
-                break;
-            } catch (IOException e) {// Ловим исключения ввода и вывода
-                throw new RuntimeException(e);
-            } catch (LimitLineLengthException e) {// Ловим исключения по длинне строки
-                throw new RuntimeException(e);
-            }
+        } catch (IOException e) {// Ловим исключения ввода и вывода
+            throw new RuntimeException(e);
+        } catch (LimitLineLengthException e) {// Ловим исключения по длинне строки
+            throw new RuntimeException(e);
         }
     }
 }

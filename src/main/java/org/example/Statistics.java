@@ -9,14 +9,28 @@ public class Statistics {
     LocalDateTime minTime;
     LocalDateTime maxTime;
     Long totalTraffic = 0L;
-    //адреса страниц сайта с кодом ответа 200
+    /**
+     * Адреса страниц сайта с кодом ответа 200
+     */
     HashSet<String> hashSetExistPages = new HashSet<>();
-    //статистика операционных систем пользователей сайта
+    /**
+     * Cтатистика операционных систем пользователей сайта
+     */
     HashMap<String, Integer> hashMapOsStatistics = new HashMap<>();
-    //список всех несуществующих страниц сайта
+    /**
+     * Cписок всех несуществующих страниц сайта
+     */
     HashSet<String> hashSetNotExistPages = new HashSet<>();
-    // Статистика частоты браузеров
+    /**
+     * Статистика частоты браузеров
+     */
     HashMap<String, Integer> hashMapBrowserStatistics = new HashMap<>();
+    /**
+     * Общее количество запросов от пользователей
+     */
+    Integer requestFromUser = 0;
+    HashSet<String> uniqueIp = new HashSet<>();
+
     Statistics() {
 
     }
@@ -57,6 +71,12 @@ public class Statistics {
                 hashMapBrowserStatistics.put(logEntry.userAgent.browser, 1);//создали запись по ключу оп со значением - 1
             }
         }
+        // Подсчет кол-ва пользователей
+        uniqueIp.add(logEntry.getIp());
+        if (logEntry.userAgent.browser != null && !logEntry.userAgent.browser.contains("bot")) {
+            requestFromUser++;
+        }
+        //uniqueIp.size();//кол-во пользователей
     }
 
     public HashMap<String, Double> getShareOfBrowsers() {
@@ -68,7 +88,7 @@ public class Statistics {
         //System.out.println("allBrowsers " + allBrowsers);
         for (String key : hashMapBrowserStatistics.keySet()) {
             Integer value = hashMapBrowserStatistics.get(key);
-            result.put(key,(double) value / allBrowsers );
+            result.put(key, (double) value / allBrowsers);
         }
         return result;
     }
@@ -82,7 +102,7 @@ public class Statistics {
         //System.out.println("allOs " + allOs);
         for (String key : hashMapOsStatistics.keySet()) {
             Integer value = hashMapOsStatistics.get(key);
-            result.put(key,(double) value / allOs );
+            result.put(key, (double) value / allOs);
             //System.out.println(key + " = " + value);
             //System.out.println(key + " = " + (double) value / allOs * 100);
         }
@@ -90,17 +110,27 @@ public class Statistics {
     }
 
     public Long getTrafficRate() {
+        Long trafficRate = totalTraffic / getDivHours();
+        return trafficRate;
+    }
+
+    public Long getDivHours() {
         Duration duration = Duration.between(minTime, maxTime);
         Long divHours = duration.toHours();
-        Long trafficRate = totalTraffic / divHours;
-        return trafficRate;
+        return divHours;
     }
 
     public HashSet<String> getUniqueUrl() {
         return hashSetExistPages;
     }
 
-    public HashSet<String> getNotExistPages(){
+    public HashSet<String> getNotExistPages() {
         return hashSetNotExistPages;
     }
+
+    //Метод подсчёта среднего количества посещений сайта за час
+    public Long getAverageUserPerHour() {
+        return requestFromUser / getDivHours();
+    }
+
 }
