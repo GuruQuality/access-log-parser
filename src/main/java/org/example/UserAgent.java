@@ -68,6 +68,13 @@ public class UserAgent {
 
     }
 
+    /**
+     *     Ой бот
+     */
+    public boolean isBot(){
+        return browser != null && browser.contains("bot");
+    }
+
     UserAgent() {
         op = null;
         browser = null;

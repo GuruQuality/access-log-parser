@@ -86,7 +86,7 @@ public class Statistics {
         }
         // Подсчет кол-ва пользователей
         uniqueIp.add(logEntry.getIp());
-        if (logEntry.userAgent.browser != null && !logEntry.userAgent.browser.contains("bot")) {
+        if (!logEntry.userAgent.isBot()) {
             requestFromUser++;
         }
         //uniqueIp.size();//кол-во пользователей
@@ -158,7 +158,7 @@ public class Statistics {
         Stream<LogEntry> stream =
                 listLogEntry
                         .stream()
-                        .filter((logEntry) -> (logEntry.userAgent.browser != null && !logEntry.userAgent.browser.contains("bot")));
+                        .filter((logEntry) -> (!logEntry.userAgent.isBot()));
         //.count();
         Long result = stream.count();
         return result / getDivHours();
@@ -169,7 +169,7 @@ public class Statistics {
         Stream<LogEntry> stream =
                 listLogEntry
                         .stream()
-                        .filter((logEntry) -> (logEntry.httpCode >= 400 && logEntry.httpCode <= 500));
+                        .filter((logEntry) -> (logEntry.httpCode >= 400 && logEntry.httpCode < 600));
         //.count();
         Long result = stream.count();
         return result / getDivHours();
@@ -180,14 +180,14 @@ public class Statistics {
         Stream<LogEntry> stream =
                 listLogEntry
                         .stream()
-                        .filter((logEntry) -> (logEntry.userAgent.browser != null && !logEntry.userAgent.browser.contains("bot")));
+                        .filter((logEntry) -> (!logEntry.userAgent.isBot()));
         //.count();
         Long totalUsers = stream.count();
 
         Stream<String> stream2 =
                 listLogEntry
                         .stream()
-                        .filter((logEntry) -> (logEntry.userAgent.browser != null && !logEntry.userAgent.browser.contains("bot")))
+                        .filter((logEntry) -> (!logEntry.userAgent.isBot()))
                         .map((logEntry) -> logEntry.getIp())
                         .distinct();
         //.count();
