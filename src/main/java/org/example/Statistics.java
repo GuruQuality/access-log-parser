@@ -30,6 +30,13 @@ public class Statistics {
      */
     Integer requestFromUser = 0;
     HashSet<String> uniqueIp = new HashSet<>();
+    //
+    String yandexBot = "YandexBot";
+    int quantityYandexBot = 0;
+    String googleBot = "Googlebot";
+    int quantityGooglebot = 0;
+
+    Integer allLine = 0;
 
     Statistics() {
 
@@ -77,6 +84,18 @@ public class Statistics {
             requestFromUser++;
         }
         //uniqueIp.size();//кол-во пользователей
+
+        //Проверка фрагмента
+        if (logEntry.userAgent != null) {
+            if (logEntry.userAgent.nameBot != null && logEntry.userAgent.nameBot.equals(yandexBot)) {
+                quantityYandexBot++;
+            }
+
+            if (logEntry.userAgent.nameBot != null && logEntry.userAgent.nameBot.equals(googleBot)) {
+                quantityGooglebot++;
+            }
+        }
+        allLine++;
     }
 
     public HashMap<String, Double> getShareOfBrowsers() {
@@ -132,5 +151,6 @@ public class Statistics {
     public Long getAverageUserPerHour() {
         return requestFromUser / getDivHours();
     }
+
 
 }
