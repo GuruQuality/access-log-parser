@@ -2,8 +2,11 @@ package org.example;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Stream;
 
 public class Statistics {
     LocalDateTime minTime;
@@ -38,11 +41,14 @@ public class Statistics {
 
     Integer allLine = 0;
 
+    List<LogEntry> listLogEntry = new ArrayList<>();
+
     Statistics() {
 
     }
 
     public void addEntry(LogEntry logEntry) {
+        listLogEntry.add(logEntry);
         totalTraffic += logEntry.size;
         if (minTime == null || logEntry.dataTime.compareTo(minTime) < 0) {
             minTime = logEntry.dataTime;
@@ -149,8 +155,43 @@ public class Statistics {
 
     //Метод подсчёта среднего количества посещений сайта за час
     public Long getAverageUserPerHour() {
-        return requestFromUser / getDivHours();
+        Stream<LogEntry> stream =
+                listLogEntry
+                        .stream()
+                        .filter((logEntry) -> (logEntry.userAgent.browser != null && !logEntry.userAgent.browser.contains("bot")));
+        //.count();
+        Long result = stream.count();
+        return result / getDivHours();
     }
 
+    //Метод подсчёта среднего количества ошибочных запросов в час.
+    public Long getAverageUserPerErrorHour() {
+        Stream<LogEntry> stream =
+                listLogEntry
+                        .stream()
+                        .filter((logEntry) -> (logEntry.httpCode >= 400 && logEntry.httpCode <= 500));
+        //.count();
+        Long result = stream.count();
+        return result / getDivHours();
+    }
 
+    //Метод расчёта средней посещаемости одним пользователем.
+    public Long getAverageOneUser() {
+        Stream<LogEntry> stream =
+                listLogEntry
+                        .stream()
+                        .filter((logEntry) -> (logEntry.userAgent.browser != null && !logEntry.userAgent.browser.contains("bot")));
+        //.count();
+        Long totalUsers = stream.count();
+
+        Stream<String> stream2 =
+                listLogEntry
+                        .stream()
+                        .filter((logEntry) -> (logEntry.userAgent.browser != null && !logEntry.userAgent.browser.contains("bot")))
+                        .map((logEntry) -> logEntry.getIp())
+                        .distinct();
+        //.count();
+        Long uniqueUsers = stream2.count();
+        return totalUsers / uniqueUsers;
+    }
 }

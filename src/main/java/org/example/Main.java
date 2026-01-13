@@ -95,6 +95,8 @@ public class Main {
         //System.out.println("Возрат не существуюших страниц: " + statistics.getNotExistPages());
         //System.out.println("Частота встречаемости каждого браузера: " + statistics.hashMapBrowserStatistics);
         //System.out.println("Доля каждого браузера (share of browsers): " + statistics.getShareOfBrowsers());
-        System.out.println("Подсчёта среднего количества посещений сайта за час (только пользователи): " + statistics.getAverageUserPerHour());
+        System.out.println("Подсчёт среднего количества посещений сайта за час (только пользователи): " + statistics.getAverageUserPerHour());
+        System.out.println("Подсчёта среднего количества ошибочных запросов в час: " + statistics.getAverageUserPerErrorHour());
+        System.out.println("Метод расчёта средней посещаемости одним пользователем: " + statistics.getAverageOneUser());
     }
 }
