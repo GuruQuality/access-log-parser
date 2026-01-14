@@ -1,11 +1,11 @@
 package org.example;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.time.ZoneOffset;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class Statistics {
@@ -42,6 +42,12 @@ public class Statistics {
     Integer allLine = 0;
 
     List<LogEntry> listLogEntry = new ArrayList<>();
+    // Статистика посещений сайта в секунду, ключи - секунды
+    HashMap<Long, Integer> hashMapVisitPersecond = new HashMap<>();
+    // Спсиок сайтов
+    HashSet<String> hashSetDomen = new HashSet<>();
+    // Статистика посещений сайта по IP
+    HashMap<String, Integer> hashMapVisitByIp = new HashMap<>();
 
     Statistics() {
 
@@ -102,6 +108,36 @@ public class Statistics {
             }
         }
         allLine++;
+        // Cтатистика посещаемости за секунду
+        long second = logEntry.dataTime.toEpochSecond(ZoneOffset.UTC);
+        if (!logEntry.userAgent.isBot()) {
+            if (hashMapVisitPersecond.containsKey(second)) {//проеврка в hashMap наличия ключа с нашим HashMap
+                int countVisite = hashMapVisitPersecond.get(second);//из hashMap получили наше значение по ключу
+                hashMapVisitPersecond.put(second, countVisite + 1);//увеличили значение на 1
+            } else {
+                hashMapVisitPersecond.put(second, 1);//создали запись по ключу оп со значением - 1
+            }
+        }
+        // Список доменов
+        String referer = logEntry.referer;
+        try {
+            URL url = new URL(referer);
+            String domain = url.getHost();
+            hashSetDomen.add(domain);
+            //System.out.println("Домен: " + domain);// nova-news.ru
+        } catch (MalformedURLException e) {
+            //System.out.println(referer);
+        }
+        // Cтатистика посещаемости по IP
+        String ip = logEntry.getIp();
+        if (!logEntry.userAgent.isBot() && !ip.isEmpty()) {
+            if (hashMapVisitByIp.containsKey(ip)) {//проеврка в hashMap наличия ключа с нашим HashMap
+                int countVisite = hashMapVisitByIp.get(ip);//из hashMap получили наше значение по ключу
+                hashMapVisitByIp.put(ip, countVisite + 1);//увеличили значение на 1
+            } else {
+                hashMapVisitByIp.put(ip, 1);//создали запись по ключу оп со значением - 1
+            }
+        }
     }
 
     public HashMap<String, Double> getShareOfBrowsers() {
@@ -193,5 +229,32 @@ public class Statistics {
         //.count();
         Long uniqueUsers = stream2.count();
         return totalUsers / uniqueUsers;
+    }
+
+    // Метод расчёта пиковой посещаемости сайта
+    public Integer getPeakVisitPersecond() {
+        //System.out.println(hashMapVisitPersecond.entrySet().stream().sorted(Map.Entry.comparingByValue()).toList());//Вывод посещаемости сайта
+        Optional<Integer> result = hashMapVisitPersecond.values().stream().max(Integer::compareTo);
+        if (result.isEmpty()) {
+            return 0;
+        } else {
+            return result.get();
+        }
+    }
+
+    //Метод, возвращающий список сайтов, со страниц которых есть ссылки на текущий сайт
+    public HashSet<String> getRefererDomen() {
+        return hashSetDomen;
+    }
+
+    //Метод расчёта максимальной посещаемости одним пользователем
+    public Integer getTopViewsOnUser() {
+        //System.out.println(hashMapVisitByIp);
+        Optional<Integer> result = hashMapVisitByIp.values().stream().max(Integer::compareTo);
+        if (result.isEmpty()) {
+            return 0;
+        } else {
+            return result.get();
+        }
     }
 }
