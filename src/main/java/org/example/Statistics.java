@@ -181,8 +181,12 @@ public class Statistics {
         return divHours;
     }
 
-    public HashSet<String> getUniqueUrl() {
+    public HashSet<String> getExistPages() {
         return hashSetExistPages;
+    }
+
+    public HashMap<String, Integer> getOsStatistics(){
+        return hashMapOsStatistics;
     }
 
     public HashSet<String> getNotExistPages() {

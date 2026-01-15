@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Scanner;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
@@ -88,9 +89,12 @@ public class Main {
         System.out.println("totalTraffic: " + statistics.totalTraffic);
         System.out.println("trafficRate: " + statistics.getTrafficRate());
         System.out.println();
-        //System.out.println("Unique url (getUniqueUrl): " + statistics.getUniqueUrl());
-        //System.out.println("Частота встречаемости каждой операционной системы: " + statistics.hashMapOsStatistics);
-        //System.out.println("Доля каждой операционной системы (share of operating systems): " + statistics.getShareOfOperatingSystems());
+        System.out.println("Список всех существующих страниц сайта (getUniqueUrl): " + statistics.getExistPages());
+        System.out.println("Частота встречаемости каждой операционной системы: " + statistics.getOsStatistics());
+        HashMap<String, Double> shareOfOperatingSystems = statistics.getShareOfOperatingSystems();
+        System.out.println("Доля каждой операционной системы (share of operating systems): " + shareOfOperatingSystems);
+        Double sum = shareOfOperatingSystems.values().stream().reduce(Double::sum).orElse(0.0);
+        System.out.println("Доля каждой операционной системы (проверка): " + String.format("%.1f", sum));
         //System.out.println();
         //System.out.println("Возрат не существуюших страниц: " + statistics.getNotExistPages());
         //System.out.println("Частота встречаемости каждого браузера: " + statistics.hashMapBrowserStatistics);
@@ -98,9 +102,9 @@ public class Main {
         //System.out.println("Подсчёт среднего количества посещений сайта за час (только пользователи): " + statistics.getAverageUserPerHour());
         //System.out.println("Подсчёта среднего количества ошибочных запросов в час: " + statistics.getAverageUserPerErrorHour());
         //System.out.println("Метод расчёта средней посещаемости одним пользователем: " + statistics.getAverageOneUser());
-        System.out.println();
-        System.out.println("Метод расчёта пиковой посещаемости сайта: " + statistics.getPeakVisitPersecond());
-        System.out.println("Метод, возвращающий список сайтов, со страниц которых есть ссылки на текущий сайт: " + statistics.getRefererDomen());
-        System.out.println("Метод расчёта максимальной посещаемости одним пользователе: " + statistics.getTopViewsOnUser());
+        //System.out.println();
+        //System.out.println("Метод расчёта пиковой посещаемости сайта: " + statistics.getPeakVisitPersecond());
+        //System.out.println("Метод, возвращающий список сайтов, со страниц которых есть ссылки на текущий сайт: " + statistics.getRefererDomen());
+        //System.out.println("Метод расчёта максимальной посещаемости одним пользователе: " + statistics.getTopViewsOnUser());
     }
 }
