@@ -1,17 +1,25 @@
 package org.example;
 
+import eu.bitwalker.useragentutils.OperatingSystem;
+
 public class UserAgent {
     String op;
     String browser;
     String nameBot = "";
 
     UserAgent(String line) {
+        eu.bitwalker.useragentutils.UserAgent userAgent = eu.bitwalker.useragentutils.UserAgent.parseUserAgentString(line);
+        OperatingSystem os = userAgent.getOperatingSystem();
+        eu.bitwalker.useragentutils.Browser browser = userAgent.getBrowser();
+        this.browser = browser.getName();
+        //System.out.println("ОС: " + os.getName());
+        op = os.getName();
         ///
         /// Парсинг наименования браузера
         ///
         String[] parts = line.split("/");
         // User-Agent будет в последнем элементе массива
-        browser = parts[0];
+        //browser = parts[0];
 
         ///
         /// Парсинг наименования операционной системы
@@ -25,7 +33,7 @@ public class UserAgent {
         if (endOp == -1 || startOp > endOp) {
             //System.out.println("Strange User-Agent: " + line);
         } else {
-            op = line.substring(startOp + 1, endOp);
+            //op = line.substring(startOp + 1, endOp);
         }
         ///
         /// Парсинг наименования Бота
@@ -44,7 +52,7 @@ public class UserAgent {
         }
 
         // 1.1 Извлекаем содержимое первых скобок
-        String firstBrackets = line.substring(startIndex, endIndex);
+        String firstBrackets = line.substring(startIndex + 1, endIndex);
 
         // 2. Разделение по точке с запятой
         parts = firstBrackets.split(";");
@@ -66,6 +74,13 @@ public class UserAgent {
             }
         }
 
+    }
+
+    /**
+     * Ой бот
+     */
+    public boolean isBot() {
+        return browser != null && browser.contains("bot");
     }
 
     UserAgent() {

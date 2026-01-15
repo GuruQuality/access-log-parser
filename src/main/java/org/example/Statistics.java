@@ -1,27 +1,60 @@
 package org.example;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.time.ZoneOffset;
+import java.util.*;
+import java.util.stream.Stream;
 
 public class Statistics {
     LocalDateTime minTime;
     LocalDateTime maxTime;
     Long totalTraffic = 0L;
-    //адреса страниц сайта с кодом ответа 200
+    /**
+     * Адреса страниц сайта с кодом ответа 200
+     */
     HashSet<String> hashSetExistPages = new HashSet<>();
-    //статистика операционных систем пользователей сайта
+    /**
+     * Cтатистика операционных систем пользователей сайта
+     */
     HashMap<String, Integer> hashMapOsStatistics = new HashMap<>();
-    //список всех несуществующих страниц сайта
+    /**
+     * Cписок всех несуществующих страниц сайта
+     */
     HashSet<String> hashSetNotExistPages = new HashSet<>();
-    // Статистика частоты браузеров
+    /**
+     * Статистика частоты браузеров
+     */
     HashMap<String, Integer> hashMapBrowserStatistics = new HashMap<>();
+    /**
+     * Общее количество запросов от пользователей
+     */
+    Integer requestFromUser = 0;
+    HashSet<String> uniqueIp = new HashSet<>();
+    //
+    String yandexBot = "YandexBot";
+    int quantityYandexBot = 0;
+    String googleBot = "Googlebot";
+    int quantityGooglebot = 0;
+
+    Integer allLine = 0;
+
+    List<LogEntry> listLogEntry = new ArrayList<>();
+    // Статистика посещений сайта в секунду, ключи - секунды
+    HashMap<Long, Integer> hashMapVisitPersecond = new HashMap<>();
+    // Спсиок сайтов
+    HashSet<String> hashSetDomen = new HashSet<>();
+    // Статистика посещений сайта по IP
+    HashMap<String, Integer> hashMapVisitByIp = new HashMap<>();
+
     Statistics() {
 
     }
 
     public void addEntry(LogEntry logEntry) {
+        listLogEntry.add(logEntry);
         totalTraffic += logEntry.size;
         if (minTime == null || logEntry.dataTime.compareTo(minTime) < 0) {
             minTime = logEntry.dataTime;
@@ -57,6 +90,54 @@ public class Statistics {
                 hashMapBrowserStatistics.put(logEntry.userAgent.browser, 1);//создали запись по ключу оп со значением - 1
             }
         }
+        // Подсчет кол-ва пользователей
+        uniqueIp.add(logEntry.getIp());
+        if (!logEntry.userAgent.isBot()) {
+            requestFromUser++;
+        }
+        //uniqueIp.size();//кол-во пользователей
+
+        //Проверка фрагмента
+        if (logEntry.userAgent != null) {
+            if (logEntry.userAgent.nameBot != null && logEntry.userAgent.nameBot.equals(yandexBot)) {
+                quantityYandexBot++;
+            }
+
+            if (logEntry.userAgent.nameBot != null && logEntry.userAgent.nameBot.equals(googleBot)) {
+                quantityGooglebot++;
+            }
+        }
+        allLine++;
+        // Cтатистика посещаемости за секунду
+        long second = logEntry.dataTime.toEpochSecond(ZoneOffset.UTC);
+        if (!logEntry.userAgent.isBot()) {
+            if (hashMapVisitPersecond.containsKey(second)) {//проеврка в hashMap наличия ключа с нашим HashMap
+                int countVisite = hashMapVisitPersecond.get(second);//из hashMap получили наше значение по ключу
+                hashMapVisitPersecond.put(second, countVisite + 1);//увеличили значение на 1
+            } else {
+                hashMapVisitPersecond.put(second, 1);//создали запись по ключу оп со значением - 1
+            }
+        }
+        // Список доменов
+        String referer = logEntry.referer;
+        try {
+            URL url = new URL(referer);
+            String domain = url.getHost();
+            hashSetDomen.add(domain);
+            //System.out.println("Домен: " + domain);// nova-news.ru
+        } catch (MalformedURLException e) {
+            //System.out.println(referer);
+        }
+        // Cтатистика посещаемости по IP
+        String ip = logEntry.getIp();
+        if (!logEntry.userAgent.isBot() && !ip.isEmpty()) {
+            if (hashMapVisitByIp.containsKey(ip)) {//проеврка в hashMap наличия ключа с нашим HashMap
+                int countVisite = hashMapVisitByIp.get(ip);//из hashMap получили наше значение по ключу
+                hashMapVisitByIp.put(ip, countVisite + 1);//увеличили значение на 1
+            } else {
+                hashMapVisitByIp.put(ip, 1);//создали запись по ключу оп со значением - 1
+            }
+        }
     }
 
     public HashMap<String, Double> getShareOfBrowsers() {
@@ -68,7 +149,7 @@ public class Statistics {
         //System.out.println("allBrowsers " + allBrowsers);
         for (String key : hashMapBrowserStatistics.keySet()) {
             Integer value = hashMapBrowserStatistics.get(key);
-            result.put(key,(double) value / allBrowsers );
+            result.put(key, (double) value / allBrowsers);
         }
         return result;
     }
@@ -82,7 +163,7 @@ public class Statistics {
         //System.out.println("allOs " + allOs);
         for (String key : hashMapOsStatistics.keySet()) {
             Integer value = hashMapOsStatistics.get(key);
-            result.put(key,(double) value / allOs );
+            result.put(key, (double) value / allOs);
             //System.out.println(key + " = " + value);
             //System.out.println(key + " = " + (double) value / allOs * 100);
         }
@@ -90,17 +171,98 @@ public class Statistics {
     }
 
     public Long getTrafficRate() {
-        Duration duration = Duration.between(minTime, maxTime);
-        Long divHours = duration.toHours();
-        Long trafficRate = totalTraffic / divHours;
+        Long trafficRate = totalTraffic / getDivHours();
         return trafficRate;
     }
 
-    public HashSet<String> getUniqueUrl() {
+    public Long getDivHours() {
+        Duration duration = Duration.between(minTime, maxTime);
+        Long divHours = duration.toHours();
+        return divHours;
+    }
+
+    public HashSet<String> getExistPages() {
         return hashSetExistPages;
     }
 
-    public HashSet<String> getNotExistPages(){
+    public HashMap<String, Integer> getOsStatistics() {
+        return hashMapOsStatistics;
+    }
+
+    public HashMap<String, Integer> getBrowserStatistics() {
+        return hashMapBrowserStatistics;
+    }
+
+    public HashSet<String> getNotExistPages() {
         return hashSetNotExistPages;
+    }
+
+    //Метод подсчёта среднего количества посещений сайта за час
+    public Long getAverageUserPerHour() {
+        Stream<LogEntry> stream =
+                listLogEntry
+                        .stream()
+                        .filter((logEntry) -> (!logEntry.userAgent.isBot()));
+        //.count();
+        Long result = stream.count();
+        return result / getDivHours();
+    }
+
+    //Метод подсчёта среднего количества ошибочных запросов в час.
+    public Long getAverageUserPerErrorHour() {
+        Stream<LogEntry> stream =
+                listLogEntry
+                        .stream()
+                        .filter((logEntry) -> (logEntry.httpCode >= 400 && logEntry.httpCode < 600));
+        //.count();
+        Long result = stream.count();
+        return result / getDivHours();
+    }
+
+    //Метод расчёта средней посещаемости одним пользователем.
+    public Long getAverageOneUser() {
+        Stream<LogEntry> stream =
+                listLogEntry
+                        .stream()
+                        .filter((logEntry) -> (!logEntry.userAgent.isBot()));
+        //.count();
+        Long totalUsers = stream.count();
+
+        Stream<String> stream2 =
+                listLogEntry
+                        .stream()
+                        .filter((logEntry) -> (!logEntry.userAgent.isBot()))
+                        .map((logEntry) -> logEntry.getIp())
+                        .distinct();
+        //.count();
+        Long uniqueUsers = stream2.count();
+        return totalUsers / uniqueUsers;
+    }
+
+    // Метод расчёта пиковой посещаемости сайта
+    public Integer getPeakVisitPersecond() {
+        //System.out.println(hashMapVisitPersecond.entrySet().stream().sorted(Map.Entry.comparingByValue()).toList());//Вывод посещаемости сайта
+        Optional<Integer> result = hashMapVisitPersecond.values().stream().max(Integer::compareTo);
+        if (result.isEmpty()) {
+            return 0;
+        } else {
+            return result.get();
+        }
+    }
+
+    //Метод, возвращающий список сайтов, со страниц которых есть ссылки на текущий сайт
+    public HashSet<String> getRefererDomen() {
+        return hashSetDomen;
+    }
+
+    //Метод расчёта максимальной посещаемости одним пользователем
+    public Integer getTopViewsOnUser() {
+        //System.out.println(hashMapVisitByIp);
+        Optional<Integer> result = hashMapVisitByIp.values().stream().max(Integer::compareTo);
+        if (result.isEmpty()) {
+            return 0;
+        } else {
+            return result.get();
+        }
     }
 }
