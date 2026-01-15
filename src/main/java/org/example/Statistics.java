@@ -185,8 +185,12 @@ public class Statistics {
         return hashSetExistPages;
     }
 
-    public HashMap<String, Integer> getOsStatistics(){
+    public HashMap<String, Integer> getOsStatistics() {
         return hashMapOsStatistics;
+    }
+
+    public HashMap<String, Integer> getBrowserStatistics() {
+        return hashMapBrowserStatistics;
     }
 
     public HashSet<String> getNotExistPages() {

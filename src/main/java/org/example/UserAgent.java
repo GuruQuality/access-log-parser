@@ -10,6 +10,8 @@ public class UserAgent {
     UserAgent(String line) {
         eu.bitwalker.useragentutils.UserAgent userAgent = eu.bitwalker.useragentutils.UserAgent.parseUserAgentString(line);
         OperatingSystem os = userAgent.getOperatingSystem();
+        eu.bitwalker.useragentutils.Browser browser = userAgent.getBrowser();
+        this.browser = browser.getName();
         //System.out.println("ОС: " + os.getName());
         op = os.getName();
         ///
@@ -17,7 +19,7 @@ public class UserAgent {
         ///
         String[] parts = line.split("/");
         // User-Agent будет в последнем элементе массива
-        browser = parts[0];
+        //browser = parts[0];
 
         ///
         /// Парсинг наименования операционной системы
